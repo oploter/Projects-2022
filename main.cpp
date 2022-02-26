@@ -26,7 +26,7 @@ int main(int argc, char * argv[]){
 
 
 
-    sf::Font& basic_font = load_new_font("basic", "LEMONMILK-Light.otf");
+    sf::Font& basic_font = load_new_font("basic", "fonts_textures/basicFont.otf");
 
     sf::Text start_button("Start game", basic_font);
     start_button.setOutlineColor(sf::Color::Green);
@@ -38,7 +38,7 @@ int main(int argc, char * argv[]){
     close_button.setPosition(sf::Vector2f(windowWidth/2 - (start_button.getLocalBounds().width)/2, windowHeight/2 + 100 - (start_button.getLocalBounds().height)/2));
     close_button.setFillColor(sf::Color::Red);
 
-    load_new_texture("returnButton", "return-button-png-34581.png");
+    load_new_texture("returnButton", "fonts_textures/returnButton.png");
 
     while(window.isOpen()){
         sf::Event event;
