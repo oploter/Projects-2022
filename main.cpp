@@ -33,10 +33,11 @@ int main(int argc, char * argv[]){
     start_button.setOutlineThickness(1);
     start_button.setPosition(sf::Vector2f(windowWidth/2 - (start_button.getLocalBounds().width)/2, windowHeight/2 - (start_button.getLocalBounds().height)/2));
 
-    sf::RectangleShape close_button;
-    close_button.setSize(sf::Vector2f(120, 60));
-    close_button.setPosition(sf::Vector2f(windowWidth/2 - (start_button.getLocalBounds().width)/2, windowHeight/2 + 100 - (start_button.getLocalBounds().height)/2));
-    close_button.setFillColor(sf::Color::Red);
+    sf::Text close_button("Exit", basic_font);
+    close_button.setOutlineColor(sf::Color::Red);
+    close_button.setOutlineThickness(1);
+    sf::FloatRect start_button_pos = start_button.getGlobalBounds();
+    close_button.setPosition(start_button_pos.left, start_button_pos.top + start_button_pos.height + 10);
 
     load_new_texture("returnButton", "fonts_textures/returnButton.png");
 
@@ -55,6 +56,9 @@ int main(int argc, char * argv[]){
                 if(start_button.getGlobalBounds().contains(mouse_x, mouse_y)){
                     std::cout << "START BUTTON PRESSED\n";
                     run_game_cycle(window);
+                    window.setTitle("Main window");
+                }else if(close_button.getGlobalBounds().contains(mouse_x, mouse_y)){
+                    window.close();
                 }
             } 
         }
@@ -73,12 +77,6 @@ int main(int argc, char * argv[]){
 
 
 /*
-g++ -c main.cpp game_cycle.cpp load_funcs.cpp
-g++ main.o game_cycle.o load_funcs.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-system
-
-
-
-
 window.display() -- отобразить все новое
 window.clear() -- очистить фон
 window.clear(Color) -- очистить фон и заменить на новый цвет // RGB alpha
@@ -126,5 +124,8 @@ sf::Sprite load_sprite(){
 
 
 Sprite хранит только ссылку на Texture, поэтому необходимо, чтобы lifetime текстуры не был меньше lifetime sprite
+
+
+sf::Event - union. Имеет 1 состояние в 1 момент. Соответсвтенно, может иметь только заданный набор полей
 
 */
