@@ -7,7 +7,6 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 
-
 inline sf::Font* get_or_create_font(const std::string& font_name, const std::string& path_to_font = ""){
     static std::unordered_map<std::string, std::unique_ptr<sf::Font>> fonts;
     std::cout << "getting font " << font_name << ' ' << fonts.count(font_name) << std::endl;

@@ -9,17 +9,21 @@
 
 //Map
 
-const std::unordered_map<Map::BlockType, std::string> Map::block_names = {{Map::green, "green_block"}, {Map::beton, "brick_block"}, {Map::water, "water_block"}, {Map::noblock, "noblock_block"}, {Map::used, "green_block"}};
-const std::unordered_map<Map::BlockType, std::string> Map::block_state = {{Map::green, "plant here"}, {Map::beton, "cannot plant here"}, {Map::water, "water"}, {Map::used, "cannot plant here"}};
+const int Map::BlockSize = 50;
+const int Map::CellSize = 10;
 
-Map::Map(const std::string& file_name) : state_text("None", *get_or_create_font("basic_font")){
+const std::unordered_map<Map::BlockType, std::string> Map::textureNames = {{Map::green, "green_block"}, {Map::brick, "brick_block"}, {Map::water, "water_block"}, {Map::noblock, "noblock_block"}, {Map::used, "green_block"}};
+const std::unordered_map<Map::BlockType, std::string> Map::blockState = {{Map::green, "plant here"}, {Map::brick, "cannot plant here"}, {Map::water, "water"}, {Map::used, "cannot plant here"}};
+
+Map::Map(const std::string& file_name) : stateText("None", *get_or_create_font("basic_font")){
     std::ifstream file(file_name, std::ios_base::in);
-    file >> rows >> cols;
-    if(!rTexture.create(cols * blockSize, rows * blockSize)){
+    file >> cols >> rows;
+
+    if(!rTexture.create(cols * BlockSize, rows * BlockSize)){
         std::cout << "Couldnot create texture\n";
     }
     
-    field.resize(rows, std::vector<Cell>(cols, Cell(noblock)));
+    field.resize(rows, std::vector<Block>(cols, Block(noblock)));
     for(std::size_t row = 0; row < rows; row++){
         for(std::size_t col = 0; col < cols; col++){
             int elem;
@@ -30,9 +34,9 @@ Map::Map(const std::string& file_name) : state_text("None", *get_or_create_font(
         }
     }
 
-    state_text.setFillColor(sf::Color::Red);
-    state_text.setScale(0.9, 0.9);
-    state_text.setPosition(blockSize * cols - 50, blockSize);
+    stateText.setFillColor(sf::Color::Red);
+    stateText.setScale(0.9, 0.9);
+    stateText.setPosition(BlockSize * cols - 50, BlockSize);
     update();
 }
 
@@ -42,9 +46,9 @@ void Map::update(){
     std::cout << field.size() << ' ' << field[0].size() << std::endl;
     for(std::size_t row = 0; row < rows; row++){
         for(std::size_t col = 0; col < cols; col++){
-            sf::Texture* block_texture = get_or_create_texture(block_names.at(field[row][col].type));
+            sf::Texture* block_texture = get_or_create_texture(textureNames.at(field[row][col].type));
             sf::Sprite s(*block_texture);
-            s.setPosition(col * blockSize, row * blockSize);
+            s.setPosition(col * BlockSize, row * BlockSize);
             rTexture.draw(s);
         }
     }
@@ -67,31 +71,31 @@ void Map::checkPlayer(Player& player){
     if(pot == water){
         player.dead = true;
     }
-    state_text.setString(block_state.at(pot));
-    state_text.setPosition(blockSize * cols - 2 * blockSize - state_text.getLocalBounds().width, blockSize);
+    stateText.setString(blockState.at(pot));
+    stateText.setPosition(BlockSize * cols - 2 * BlockSize - stateText.getLocalBounds().width, BlockSize);
 }
 
 
 void Map::print(sf::RenderTarget& window){
     sf::Sprite s(rTexture.getTexture());
     window.draw(s);
-    window.draw(state_text);
+    window.draw(stateText);
 }
 
 // Map end
 
 // Plant/Cell
 
-Plant::Plant() : Cell(Map::used), hp(hpDefault), timeLimit(timeLimitDefault){
-    std::cout << "new plant created\n";
-}
-
-int Plant::get_hp() const {
-    return hp;
-}
-
-int Plant::get_timeLimit() const {
-    return timeLimit;
-}
+//Plant::Plant() : Cell(Map::used), hp(hpDefault), timeLimit(timeLimitDefault){
+//    std::cout << "new plant created\n";
+//}
+//
+//int Plant::get_hp() const {
+//    return hp;
+//}
+//
+//int Plant::get_timeLimit() const {
+//    return timeLimit;
+//}
 
 // Plant/Cell end

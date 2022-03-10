@@ -18,20 +18,20 @@ sf::Sprite createSprite(sf::Texture& text, const std::string& file_name){
     return new_sprite;  
 }
 
-// void create_map_file(const std::string& file_name){
-//     int rows = windowHeight / Map::blockSize + 1;
-//     int cols = windowWidth / Map::blockSize + 1;
-//     std::ofstream file(file_name, std::ios_base::out);
-//     file << rows << ' ' << cols << "\n";
-//     for(int row = 0; row < rows; row++){
-//         file << 0;
-//         for(int col = 1; col < cols; col++){
-//             file << ' ' << 0; 
-//         }
-//         file << "\n";
-//     }
-//     std::cout << "created file " << rows << ' ' << cols << std::endl;
-// }   
+void create_map_file(const std::string& filename, sf::RenderWindow& window){
+    int numOfBlocksW = 1 + window.getSize().x / Map::BlockSize;
+    int numOfBlcoksH = 1 + window.getSize().y / Map::BlockSize;
+    std::cout << "creating file " << numOfBlocksW << ' ' << numOfBlcoksH << std::endl;
+    std::ofstream file(filename, std::ios_base::out);
+    file << numOfBlocksW << ' ' << numOfBlcoksH << "\n";
+    for(int row = 0; row < numOfBlcoksH; row++){
+        file << 0;
+        for(int col = 1; col < numOfBlocksW; col++){
+            file << ' ' << 0;
+        }
+        file << "\n";
+    }
+}  
 
 int main(int argc, char * argv[]){
     std::cout << "got " << argc << " arguments\n";
@@ -47,7 +47,7 @@ int main(int argc, char * argv[]){
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Main window");
     window.setFramerateLimit(60);
     std::cout << "window size " << windowWidth << ' ' << windowHeight << std::endl;
-    //create_map_file("map.txt");
+    //create_map_file("map.txt", window);
 
 
     get_or_create_texture("green_block", "fonts_textures/green_block.png");

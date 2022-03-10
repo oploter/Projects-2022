@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+
 #include <string>
 #include <iostream>
 #include <unordered_map>
@@ -10,7 +11,7 @@ int widthCells, heightCells;
 
 // Player
 
-Player::Player() : x(Radius / Map::cellSize), y(Radius / Map::cellSize), circle(20){
+Player::Player() : x(Radius / Map::CellSize), y(Radius / Map::CellSize), circle(20){
     circle.setFillColor(sf::Color::Red);
 }
 
@@ -25,7 +26,7 @@ void Player::move(const std::pair<int, int>& delta){
     x = new_x;
     y = new_y;
     std::cout << "moved to " << x << ' ' << y << std::endl;
-    circle.move(Map::cellSize * speed * delta.first, Map::cellSize * speed * delta.second);
+    circle.move(Map::CellSize * speed * delta.first, Map::CellSize * speed * delta.second);
 }
 
 void Player::print(sf::RenderTarget& window) const {
@@ -37,7 +38,7 @@ bool Player::isDead() const {
 }
 
 std::pair<int, int> Player::get_map_cords() const {
-    return {(Map::cellSize * x) / Map::blockSize, (Map::cellSize * y) / Map::blockSize};
+    return {(Map::CellSize * x) / Map::BlockSize, (Map::CellSize * y) / Map::BlockSize};
 }
 
 // Player end
@@ -49,8 +50,8 @@ std::unordered_map<sf::Keyboard::Key, std::pair<int, int>> deltas_arrows = {{sf:
 
 int run_game_cycle(sf::RenderWindow &window) {
     std::cout << "windows size " << window.getSize().x << ' ' << window.getSize().y << std::endl;
-    widthCells = window.getSize().x / Map::cellSize;
-    heightCells = window.getSize().y / Map::cellSize;
+    widthCells = window.getSize().x / Map::CellSize;
+    heightCells = window.getSize().y / Map::CellSize;
     std::cout << "number of cells is " << widthCells << ' ' << heightCells << std::endl;
     window.setTitle("Game cycle");
     sf::Font* basic_font = get_or_create_font("basic_font");
