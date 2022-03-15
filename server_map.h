@@ -6,10 +6,10 @@
 
 struct ServerMap : Map{
 public:
-    ServerMap(){}
+    ServerMap();
     ServerMap(const std::string& file_name);
 
-    bool movePlayer(const std::pair<int, int>& delta);
+    bool movePlayer(int delta_x, int delta_y);
 };
 
 #endif

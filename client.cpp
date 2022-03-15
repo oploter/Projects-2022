@@ -26,7 +26,7 @@ int ClientGame::gameWindow(){
     std::cout << "after loasdnkf\n";
     player = Player();
 
-    const std::unordered_map<sf::Keyboard::Key, std::pair<int, int>> key_codes{{sf::Keyboard::W, {0, 1}}, {sf::Keyboard::A, {-1, 0}}, {sf::Keyboard::S, {0, -1}}, {sf::Keyboard::D, {1, 0}}};
+    const std::unordered_map<sf::Keyboard::Key, std::pair<int, int>> key_codes{{sf::Keyboard::W, {0, -1}}, {sf::Keyboard::A, {-1, 0}}, {sf::Keyboard::S, {0, 1}}, {sf::Keyboard::D, {1, 0}}};
     int msgs = 0;
     while(window.isOpen()){
         sf::Event ev;
@@ -36,21 +36,22 @@ int ClientGame::gameWindow(){
             }
             if(ev.type == sf::Event::KeyPressed){
                 auto code = ev.key.code;
+                auto& q = queue_for_ser();
                 if(code == sf::Keyboard::K){
                     //plant
-                    auto& q = get_queue();
                     std::cout << "plant " << q.size() << std::endl;
-                    q.push({1, player.get_map_cords()});
+                    q.push({2, player.get_map_cords()});
                     msgs++;
                     std::cout << "plant\n";
                 }else if(key_codes.count(code) > 0){
-                    auto& q = get_queue();
                     std::cout << "move {" << key_codes.at(code).first << ' ' << key_codes.at(code).second << "}\n";
-                    q.push({2, key_codes.at(code)});
+                    q.push({1, key_codes.at(code)});
                     msgs++;
                 }
             }
         }
+
+        auto& from_srvr = queue_for_cl();
 
         if(player.isDead()){
             return 1;

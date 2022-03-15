@@ -41,21 +41,21 @@ struct Block;
 enum PlantType {off = 0, deff, extra}; 
 
 struct Player{
-private:
-    float x = 0;
-    float y = 0; 
+private: 
     sf::CircleShape circle;
     float speed = 1.5;
     static int Radius;
     bool dead = false;
 
 public:
+    float x = 0;
+    float y = 0;
     friend struct Map;
     Player();
    // void move(const std::pair<int, int>& delta);
     std::pair<int, int> get_map_cords() const;
     void print(sf::RenderTarget& window) const;
-
+    void updatePos(float delta_x, float delta_y);
     bool isDead() const;
 };
 
@@ -67,7 +67,7 @@ public:
     static const int BlockSize;
     static const int CellSize;
 
-    Map(){}
+    Map() : player(){}
     Map(int rows_, int cols_);
     Map(const std::string& file_name);
     //void loadMap(const std::string& file_name);

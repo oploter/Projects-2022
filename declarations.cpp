@@ -44,6 +44,12 @@ void Player::print(sf::RenderTarget& target) const {
     target.draw(circle);
 }
 
+void Player::updatePos(float delta_x, float delta_y){
+    x += delta_x;
+    y += delta_y;
+    std::cout << "player pos " << x << ' ' << y << std::endl;
+}
+
 bool Player::isDead() const {
     return dead;
 }

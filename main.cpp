@@ -28,6 +28,7 @@ int main(){
         srg.runGameServer();
     });
     ClientGame clg;
+    std::cout << "client runnig\n";
     clg.runGame();
     t1.join();
 }

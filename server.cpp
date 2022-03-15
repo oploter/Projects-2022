@@ -20,11 +20,18 @@ void ServerGame::runGameServer(){
             q_s.pop();
             std::cout << "new ev " << pr.first << " {" << pr.second.first << ' ' << pr.second.second << "}\n";
             if(pr.first == 1){
-                
-                q_c.push({});
+                std::pair<bool, std::string> res;
+                res.first = map.movePlayer(pr.second.first, pr.second.second);
+                if(!res.first){
+                    res.second = "error move";
+                }
+                q_c.push(res);
+                std::cout << "pushed to client\n";
+            }else{
+                std::cout << "unknkw\n";
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(4000));
         std::cout << "woke up\n";
     }
-}
+}   

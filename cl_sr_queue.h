@@ -9,8 +9,8 @@ inline std::queue<std::pair<int, std::pair<int, int>>>& queue_for_ser(){
     return q;
 }
 
-inline std::queue<std::pair<int, std::pair<int, int>>>& queue_for_cl(){
-    static std::queue<std::pair<int, std::pair<int, int>>> q;
+inline std::queue<std::pair<bool, std::string>>& queue_for_cl(){
+    static std::queue<std::pair<bool, std::string>> q;
     return q;
 }
 
