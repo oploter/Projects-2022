@@ -22,13 +22,9 @@
 //}  
 
 int main(){
-    std::thread t1([](){
-        ServerGame srg;
-        std::cout << "srg\n";
-        srg.runGameServer();
-    });
+
     ClientGame clg;
-    std::cout << "client runnig\n";
+    std::cout << "client running\n";    
     clg.runGame();
-    t1.join();
+
 }

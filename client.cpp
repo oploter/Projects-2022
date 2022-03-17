@@ -2,13 +2,27 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <thread>
 #include "client.h"
+#include "server.h"
 #include "declarations.h"
 #include "client_map.h"
 #include "cl_sr_queue.h"
 
 
 int ClientGame::gameWindow(){
+
+    ServerGame server;
+    server.runGameServer();
+
+    /*
+        void runGameSever(){
+            while(1){
+                do_smth;
+            }
+        }
+    */
+
     std::cout << "GAME WINDOW START\n";
     std::cout << "checking \n";
     get_or_create_texture("green_block", "fonts_textures/green_block.png");
@@ -24,44 +38,67 @@ int ClientGame::gameWindow(){
     std::cout << "before laosdonf\n";
     map.loadMap("map.txt");
     std::cout << "after loasdnkf\n";
-    player = Player();
 
-    const std::unordered_map<sf::Keyboard::Key, std::pair<int, int>> key_codes{{sf::Keyboard::W, {0, -1}}, {sf::Keyboard::A, {-1, 0}}, {sf::Keyboard::S, {0, 1}}, {sf::Keyboard::D, {1, 0}}};
-    int msgs = 0;
-    while(window.isOpen()){
+    // connect
+    if(server.connect(ip, 12345) != sf::Socket::Done){
+        std::cout << "cant servevr!!!!\n";
+        return 1;
+    }
+    std::thread send_thread([this](){
+        SendMessages();
+    });
+    std::thread receive_thread([this](){
+        ReceiveMessages();
+    });
+    // end connect
+
+    bool was_moved_prev = false;
+    while(window.isOpen() && !map.player.isDead()){
         sf::Event ev;
+        int num_buf;
         while(window.pollEvent(ev)){
-            if(ev.type == sf::Event::Closed){
+            if(ev.type == sf::Event::KeyPressed){
+                auto& code = ev.key.code;
+                if(move_deltas.count(code) > 0){
+                    const std::pair<int, int>& delta = move_deltas.at(code);
+                    sf::Packet new_msg;
+                    new_msg << 1 << delta.first << delta.second;
+                    //std::cout << "to servr " << delta.first << ' ' << delta.second << std::endl;
+                    Q_OUT.push(std::move(new_msg));
+                }
+            }else if(ev.type == sf::Event::Closed){
                 window.close();
             }
-            if(ev.type == sf::Event::KeyPressed){
-                auto code = ev.key.code;
-                auto& q = queue_for_ser();
-                if(code == sf::Keyboard::K){
-                    //plant
-                    std::cout << "plant " << q.size() << std::endl;
-                    q.push({2, player.get_map_cords()});
-                    msgs++;
-                    std::cout << "plant\n";
-                }else if(key_codes.count(code) > 0){
-                    std::cout << "move {" << key_codes.at(code).first << ' ' << key_codes.at(code).second << "}\n";
-                    q.push({1, key_codes.at(code)});
-                    msgs++;
-                }
+        }
+
+        bool was_moved_cur = false;
+        while(!Q_IN.empty()){
+            any_msgs = true;
+            sf::Packet new_msg = std::move(Q_IN.pop());
+            int type;
+            new_msg >> type;
+            if(type == 1){
+                was_moved_cur = true;
+                //std::cout << "msg from sere " << type << std::endl;
+                int delta_x, delta_y;
+                new_msg >> delta_x >> delta_y;
+                map.player.updatePos(delta_x, delta_y);
             }
         }
-
-        auto& from_srvr = queue_for_cl();
-
-        if(player.isDead()){
-            return 1;
+        if(any_msgs && was_moved_cur || (!any_msgs && was_moved_prev)){
+            map.player.state = Player::PlayerState::run;
+        }else if(){
+            map.player.state = Player::PlayerState::still;
         }
-
+        was_moved_prev = was_moved_cur;
         window.clear();
         map.print(window);
-        player.print(window);
+        map.player.print(window);
         window.display();
     }
+
+    send_thread.join();
+    receive_thread.join();
     return 0;
 }
 
@@ -126,9 +163,34 @@ void ClientGame::runGame(){
     std::cout << "window " << windowWidth << ' ' << windowHeight << std::endl;
     cellsWidth = 1 + windowWidth / Map::CellSize;
     cellsHeight = 1 + windowHeight / Map::CellSize;
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(30);
     loadTextures();
     mainWindow();
+}
+
+void ClientGame::SendMessages(){
+    while(1){
+        sf::Packet new_msg = std::move(Q_OUT.pop());
+        if(server.send(new_msg) != sf::Socket::Done){
+            return;
+        }
+        //std::cout << "sent\n";
+    }
+}
+
+void ClientGame::ReceiveMessages(){
+    while(1){
+        sf::Packet new_packet; 
+        if(server.receive(new_packet) != sf::Socket::Done){
+            return;
+        }
+        Q_IN.push(std::move(new_packet));
+        //std::cout << "received new\n";
+    }
+}
+
+ClientGame::ClientGame() : ip("127.0.0.1"){
+    std::cout << "client game\n";
 }
 
 
@@ -140,4 +202,15 @@ void ClientGame::loadTextures(){
     get_or_create_texture("water_block", "fonts_textures/water_block.png");
     get_or_create_texture("return_button", "fonts_textures/returnButton.png");
     get_or_create_font("basic_font", "fonts_textures/basicFont.otf");
+
+    sf::Image player_image;
+    player_image.loadFromFile("fonts_textures/player.png");
+    player_image.createMaskFromColor(player_image.getPixel(2, 2));
+    for(int i = 0; i < 8; i++){
+        int l_x = i * 102.5 + 20;
+        int r_x = l_x + 82.5;
+        sf::Texture* img_texture = get_or_create_texture("player_" + std::to_string(i));
+        img_texture->loadFromImage(player_image, {l_x, 2, r_x - l_x, 142});
+    }
+    std::cout << "loaded\n";
 }

@@ -9,8 +9,8 @@
 
 //Map
 
-const std::unordered_map<Map::BlockType, std::string> ClientMap::textureNames = {{Map::green, "green_block"}, {Map::brick, "brick_block"}, {Map::water, "water_block"}, {Map::noblock, "noblock_block"}, {Map::used, "yellow_block"}};
-const std::unordered_map<Map::BlockType, std::string> ClientMap::blockState = {{Map::green, "plant here"}, {Map::brick, "cannot plant here"}, {Map::water, "water"}, {Map::used, "cannot plant here"}};
+const std::unordered_map<BlockType, std::string> ClientMap::textureNames = {{green, "green_block"}, {brick, "brick_block"}, {water, "water_block"}, {noblock, "noblock_block"}, {used, "yellow_block"}};
+const std::unordered_map<BlockType, std::string> ClientMap::blockState = {{green, "plant here"}, {brick, "cannot plant here"}, {water, "water"}, {used, "cannot plant here"}};
 
 
 ClientMap::ClientMap(const std::string& file_name) : Map(file_name){
@@ -31,6 +31,7 @@ void ClientMap::updateField(int row, int col, bool display){
 void ClientMap::print(sf::RenderTarget& window){
     sf::Sprite s(rTexture.getTexture());
     window.draw(s);
+    stateText.setPosition(window.getSize().x - stateText.getLocalBounds().width, Map::BlockSize);
     window.draw(stateText);
 }
 
@@ -42,7 +43,6 @@ void ClientMap::loadMap(const std::string& file_name){
     std::ifstream file(file_name, std::ios_base::in);
     file >> cols >> rows;
     field.resize(rows, std::vector<Block>(cols, noblock));
-
     if(!rTexture.create(cols * BlockSize, rows * BlockSize)){
         std::cout << "Couldnot create texture\n";
     }

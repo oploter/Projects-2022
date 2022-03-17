@@ -2,7 +2,10 @@
 #define CLIENT_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
+#include <vector>
 #include "client_map.h"
+#include "cl_sr_queue.h"
 #include "declarations.h"
 
 struct ClientGame{
@@ -14,9 +17,16 @@ private:
     int windowHeight;
     int cellsWidth;
     int cellsHeight;
+
+
+    sf::TcpSocket server;
+    sf::IpAddress ip;
+    threadsafe_queue<sf::Packet> Q_IN;
+    threadsafe_queue<sf::Packet> Q_OUT;
+
 public:
 
-    ClientGame(){};
+    ClientGame();
     void runGame();
 
     void loadTextures();
@@ -24,6 +34,9 @@ public:
     void mainWindow();
 
     int gameWindow();
+
+    void SendMessages();
+    void ReceiveMessages();
 
 };
 
