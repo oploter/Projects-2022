@@ -50,12 +50,11 @@ public:
     float y = 0;
     friend struct Map;
     Player();
-   // void move(const std::pair<int, int>& delta);
     std::pair<int, int> get_map_cords() const;
     void print(sf::RenderTarget& window);
     void updatePos(float delta_x, float delta_y);
-    bool isDead() const;
-    enum PlayerState{still, run, dead};
+    enum PlayerState{still, run};
+
 private: 
     float speed = 1;
     int img_id = 0;
@@ -82,7 +81,6 @@ public:
     static const int CellSize;
 
     Map() : player(){}
-    Map(int rows_, int cols_);
     Map(const std::string& file_name);    
     Player player;
 

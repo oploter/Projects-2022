@@ -8,11 +8,6 @@
 const int Map::BlockSize = 50;
 const int Map::CellSize = 10;
 
-
-Map::Map(int rows_, int cols_) : rows(rows_), cols(cols_), field(rows, std::vector<Block>(cols)), player(){
-    std::cout << "map base created2\n";
-}
-
 Map::Map(const std::string& file_name) : player(){ 
     std::ifstream file(file_name);
     file >> cols >> rows;
