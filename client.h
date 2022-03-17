@@ -12,7 +12,6 @@ struct ClientGame{
 private:
     sf::RenderWindow window;
     ClientMap map;
-    Player player;
     int windowWidth;
     int windowHeight;
     int cellsWidth;

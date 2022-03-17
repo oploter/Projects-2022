@@ -12,11 +12,6 @@
 
 int ClientGame::gameWindow(){
 
-    ServerGame server;
-    std::thread t([](){
-        server.runGameServer();
-    });
-
     map.loadMap("map.txt");
 
     // connect
@@ -32,7 +27,6 @@ int ClientGame::gameWindow(){
     });
     // end connect
 
-    bool was_moved_prev = false;
     while(window.isOpen()){
         sf::Event ev;
         int num_buf;
@@ -50,26 +44,16 @@ int ClientGame::gameWindow(){
             }
         }
 
-        bool was_moved_cur = false;
         while(!Q_IN.empty()){
-            any_msgs = true;
             sf::Packet new_msg = std::move(Q_IN.pop());
             int type;
             new_msg >> type;
             if(type == 1){
-                was_moved_cur = true;
                 int delta_x, delta_y;
                 new_msg >> delta_x >> delta_y;
                 map.player.updatePos(delta_x, delta_y);
             }
         }
-        if(any_msgs && was_moved_cur || (!any_msgs && was_moved_prev)){
-            map.player.state = Player::PlayerState::run;
-        }else if(){
-            map.player.state = Player::PlayerState::still;
-        }
-        was_moved_prev = was_moved_cur;
-
 
         window.clear();
         map.print(window);

@@ -11,7 +11,6 @@ const int Map::CellSize = 10;
 Map::Map(const std::string& file_name) : player(){ 
     std::ifstream file(file_name);
     file >> cols >> rows;
-    std::cout << "got " << cols << ' ' << rows << std::endl;
     field.resize(rows, std::vector<Block>(cols));
     for(std::size_t row = 0; row < rows; row++){
         for(std::size_t col = 0; col < cols; col++){
@@ -20,7 +19,6 @@ Map::Map(const std::string& file_name) : player(){
             field[row][col] = static_cast<BlockType>(el);
         }
     }
-    std::cout << "map base3\n";
 }
 
 
@@ -40,13 +38,11 @@ void Player::print(sf::RenderTarget& target){
     if(state == still){
         s.setTexture(*get_or_create_texture("player_0"));
         if(prev != 0){
-            std::cout << "mew " << 0 << std::endl;
             prev = 0;
         }
     }else if(state == run){
         s.setTexture(*get_or_create_texture("player_" + std::to_string((img_id) / 3)));
         if(img_id / 3 > prev){
-            std::cout << "new " << (img_id / 3) << std::endl;
             prev = img_id / 3;
         }
         img_id++;
@@ -70,10 +66,6 @@ void Player::updatePos(float delta_x, float delta_y){
     y += delta_y * speed;
     dir = {delta_x, delta_y};
     std::cout << "New player pos: " << x << ' ' << y << std::endl;
-}
-
-bool Player::isDead() const {
-    return state == dead;
 }
 
 // End Player
