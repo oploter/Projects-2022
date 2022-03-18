@@ -11,9 +11,7 @@
 
 inline sf::Font* get_or_create_font(const std::string& font_name, const std::string& path_to_font = ""){
     static std::unordered_map<std::string, std::unique_ptr<sf::Font>> fonts;
-    //std::cout << "getting font " << font_name << ' ' << fonts.count(font_name) << std::endl;
     if(fonts.count(font_name) == 0){
-        std::cout << "creating font " << font_name << std::endl;
         fonts[font_name] = std::make_unique<sf::Font>();
         if(!fonts[font_name]->loadFromFile(path_to_font)){
             throw std::runtime_error("Could not load font " + path_to_font);
@@ -23,7 +21,6 @@ inline sf::Font* get_or_create_font(const std::string& font_name, const std::str
 }
 inline sf::Texture* get_or_create_texture(const std::string& texture_name, const std::string& path_to_texture = ""){
     static std::unordered_map<std::string, std::unique_ptr<sf::Texture>> textures;
-    //std::cout << "getting texture " << texture_name << ' ' << textures.count(texture_name) << std::endl;
     if(textures.count(texture_name) == 0){
         std::cout << "creating texture " << texture_name << std::endl;
         textures[texture_name] = std::make_unique<sf::Texture>();
@@ -87,6 +84,7 @@ public:
 protected:
     friend struct ClientGame;
     std::vector<std::vector<Block>> field;
+    std::vector<std::vector<float>> bullets;
     int rows, cols;
 };
 // end Map

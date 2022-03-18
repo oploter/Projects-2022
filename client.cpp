@@ -13,12 +13,11 @@
 int ClientGame::gameWindow(){
 
     map.loadMap("map.txt");
-
     // connect
     if(server.connect(ip, 12345) != sf::Socket::Done){
-        std::cout << "cant servevr!!!!\n";
         return 1;
     }
+
     std::thread send_thread([this](){
         SendMessages();
     });
@@ -27,6 +26,7 @@ int ClientGame::gameWindow(){
     });
     // end connect
 
+    bool was_moved_prev = false;
     while(window.isOpen()){
         sf::Event ev;
         int num_buf;
@@ -34,33 +34,53 @@ int ClientGame::gameWindow(){
             if(ev.type == sf::Event::KeyPressed){
                 auto& code = ev.key.code;
                 if(move_deltas.count(code) > 0){
-                    const std::pair<int, int>& delta = move_deltas.at(code);
+                    std::pair<float, float> delta = move_deltas.at(code);
+                    delta.first *= map.player.speed;
+                    delta.second *= map.player.speed;
+                    if(ev.key.shift){
+                        delta.first *= 1.5;
+                        delta.second *= 1.5;
+                    }
                     sf::Packet new_msg;
                     new_msg << 1 << delta.first << delta.second;
                     Q_OUT.push(std::move(new_msg));
+                }else if(code == sf::Keyboard::S){
+                    float new_b_x = map.player.x;
+                    float new_b_y = map.player.y;
+                    float delta_x = (sf::Mouse::getPosition(window) - new_b_x);
+                    float delta_y = (sf::Mouse::getPosition(window) - new_b_y);
+                    bullets.push_back({new_b_x, new_b_y, delta_x, delta_y});
                 }
             }else if(ev.type == sf::Event::Closed){
                 window.close();
             }
         }
-
+        bool new_msgs = false;
+        bool was_moved_curr = false;
         while(!Q_IN.empty()){
+            new_msgs = true;
             sf::Packet new_msg = std::move(Q_IN.pop());
             int type;
             new_msg >> type;
             if(type == 1){
-                int delta_x, delta_y;
+                float delta_x, delta_y;
                 new_msg >> delta_x >> delta_y;
                 map.player.updatePos(delta_x, delta_y);
+                was_moved_curr = true;
             }
         }
+        if(was_moved_curr || (!new_msgs && was_moved_prev)){
+            map.player.state = Player::PlayerState::run;
+        }else if(new_msgs || (!new_msgs && !was_moved_prev)){
+            map.player.state = Player::PlayerState::still;
+        }
+        was_moved_prev = was_moved_curr;
 
         window.clear();
         map.print(window);
         map.player.print(window);
         window.display();
     }
-
     send_thread.join();
     receive_thread.join();
     return 0;

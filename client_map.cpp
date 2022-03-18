@@ -10,10 +10,9 @@
 //Map
 
 const std::unordered_map<BlockType, std::string> ClientMap::textureNames = {{green, "green_block"}, {brick, "brick_block"}, {water, "water_block"}, {noblock, "noblock_block"}, {used, "yellow_block"}};
-const std::unordered_map<BlockType, std::string> ClientMap::blockState = {{green, "plant here"}, {brick, "cannot plant here"}, {water, "water"}, {used, "cannot plant here"}};
 
 
-ClientMap::ClientMap(const std::string& file_name) : Map(file_name){
+ClientMap::ClientMap(const std::string& file_name) : Map(){
     loadMap(file_name);
 }
 

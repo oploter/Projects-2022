@@ -50,6 +50,7 @@ void Player::print(sf::RenderTarget& target){
             img_id = 0;
         }
     }
+    std::cout << "st " << (state == PlayerState::run) << std::endl;
     s.setScale(0.5, 0.5);
     float s_width = s.getLocalBounds().width * 0.5;
     float s_height = s.getLocalBounds().height * 0.5;
@@ -62,10 +63,9 @@ void Player::print(sf::RenderTarget& target){
 }
 
 void Player::updatePos(float delta_x, float delta_y){
-    x += delta_x * speed;
-    y += delta_y * speed;
+    x += delta_x;
+    y += delta_y;
     dir = {delta_x, delta_y};
-    std::cout << "New player pos: " << x << ' ' << y << std::endl;
 }
 
 // End Player
