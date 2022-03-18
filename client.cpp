@@ -11,16 +11,19 @@
 
 
 int ClientGame::gameWindow(){
-
+    std::cout << "map loaded\n";
     map.loadMap("map.txt");
     // connect
+    std::thread srv_thread([](){
+    ServerGame srv;
+    srv.runGameServer();
+    });
     if(server.connect(ip, 12345) != sf::Socket::Done){
+        std::cout << "cant connetct\n";
         return 1;
     }
+    std::cout << "connected\n";
 
-    std::thread send_thread([this](){
-        SendMessages();
-    });
     std::thread receive_thread([this](){
         ReceiveMessages();
     });
@@ -42,11 +45,11 @@ int ClientGame::gameWindow(){
                         delta.second *= 1.5;
                     }
                     sf::Packet new_msg;
-                    new_msg << 1 << delta.first << delta.second;
+                    new_msg << delta.first << delta.second;
+
                     if(server.send(new_msg) != sf::Socket::Done){
-                        return;
+                        return 1;
                     }
-                    Q_OUT.push(std::move(new_msg));
                 }
             }else if(ev.type == sf::Event::Closed){
                 window.close();
@@ -54,17 +57,13 @@ int ClientGame::gameWindow(){
         }
         bool new_msgs = false;
         bool was_moved_curr = false;
-        while(!Q_IN.empty()){
+        while(!Q.empty()){
             new_msgs = true;
-            sf::Packet new_msg = std::move(Q_IN.pop());
-            int type;
-            new_msg >> type;
-            if(type == 1){
-                float delta_x, delta_y;
-                new_msg >> delta_x >> delta_y;
-                map.player.updatePos(delta_x, delta_y);
-                was_moved_curr = true;
-            }
+            sf::Packet new_msg = std::move(Q.pop());
+            float delta_x, delta_y;
+            new_msg >> delta_x >> delta_y;
+            map.player.updatePos(delta_x, delta_y);
+            was_moved_curr = true;
         }
         if(was_moved_curr || (!new_msgs && was_moved_prev)){
             map.player.state = Player::PlayerState::run;
@@ -78,8 +77,8 @@ int ClientGame::gameWindow(){
         map.player.print(window);
         window.display();
     }
-    send_thread.join();
     receive_thread.join();
+    srv_thread.join();
     return 0;
 }
 
@@ -108,6 +107,7 @@ void ClientGame::mainWindow(){
                 int mouse_y = event.mouseButton.y;
                 if(start_button.getGlobalBounds().contains(mouse_x, mouse_y)){
                     gameWindow();
+
                 }else if(close_button.getGlobalBounds().contains(mouse_x, mouse_y)){
                     window.close();
                 }
@@ -133,7 +133,8 @@ void ClientGame::runGame(){
     cellsHeight = 1 + windowHeight / Map::CellSize;
     window.setFramerateLimit(30);
     loadTextures();
-    mainWindow();
+    //mainWindow();
+    gameWindow();
 }
 
 void ClientGame::ReceiveMessages(){
@@ -142,7 +143,7 @@ void ClientGame::ReceiveMessages(){
         if(server.receive(new_packet) != sf::Socket::Done){
             return;
         }
-        Q_IN.push(std::move(new_packet));
+        Q.push(std::move(new_packet));
     }
 }
 

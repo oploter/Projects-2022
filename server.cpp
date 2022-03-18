@@ -10,9 +10,7 @@
 #include <mutex> 
 std::mutex m; 
 void ServerGame::runGameServer(){ 
-    std::cout << "RUNGAMESERVER\n"; 
-    map = ServerMap("map.txt"); 
-    std::cout << "map loaded\n"; 
+    map = ServerMap("map.txt");  
     sf::IpAddress ip = sf::IpAddress::getLocalAddress(); 
     listener.listen(12345); 
     if (listener.accept(socket) != sf::Socket::Done) { 
@@ -34,9 +32,9 @@ void ServerGame::SendMessages(){
         m.lock(); 
         while (!Q.empty()) { 
             packet = Q.pop(); 
-            packet << x << y; 
-            if (map.movePlayer(x, y)) { 
-                packet.clear(); 
+            packet >> x >> y; 
+            if (map.movePlayer(x, y)) {
+                packet.clear();
                 packet << x << y; 
                 socket.send(packet); 
             } 
@@ -50,5 +48,6 @@ void ServerGame::ReceiveMessages(){
         if (socket.receive(packet) == sf::Socket::Done) { 
             Q.push(packet); 
         } 
+        m.unlock();
     } 
 }

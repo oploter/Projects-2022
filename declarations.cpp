@@ -28,7 +28,7 @@ Map::Map(const std::string& file_name) : player(){
 
 // Player
 
-Player::Player() : state(still), x(51.0 / Map::CellSize), y(72.0 / Map::CellSize), dir(move_deltas.at(sf::Keyboard::D)){}
+Player::Player() : state(still), x(20.625 / Map::CellSize), y(35.5 / Map::CellSize), dir(move_deltas.at(sf::Keyboard::D)){}
 
 std::pair<int, int> Player::get_map_cords() const {
     return {(Map::CellSize * x) / Map::BlockSize, (Map::CellSize * y) / Map::BlockSize};
@@ -52,12 +52,12 @@ void Player::print(sf::RenderTarget& target){
             img_id = 0;
         }
     }
-    std::cout << "st " << (state == PlayerState::run) << std::endl;
     s.setScale(0.5, 0.5);
     float s_width = s.getLocalBounds().width * 0.5;
     float s_height = s.getLocalBounds().height * 0.5;
     s.setOrigin(s_width / 2, s_height / 2);
     s.setPosition(Map::CellSize * x, Map::CellSize * y);
+
     if(s.getScale().x * dir.first < 0){
         s.scale(-1, 1);
     }

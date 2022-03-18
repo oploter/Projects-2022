@@ -53,7 +53,7 @@ public:
     enum PlayerState{still, run};
 
 private: 
-    float speed = 1;
+    float speed = 2;
     int img_id = 0;
     std::pair<int, int> dir;
     friend struct ClientGame;
