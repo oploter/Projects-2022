@@ -41,8 +41,8 @@ void ClientMap::loadMap(const std::string& file_name){
 
     std::ifstream file(file_name, std::ios_base::in);
     file >> block_cols >> block_rows;
-    cell_cols = block_cols * (BlockSize / CellSize);
-    cell_rows = block_rows * (BlockSize / CellSize);
+    cell_cols = (block_cols * BlockSize) / CellSize;
+    cell_rows = (block_rows * BlockSize) / CellSize;
     field.resize(block_rows, std::vector<Block>(block_cols, noblock));
     if(!rTexture.create(block_cols * BlockSize, block_rows * BlockSize)){
         return;

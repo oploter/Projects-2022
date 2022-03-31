@@ -10,7 +10,7 @@ ServerMap::ServerMap() : Map() {}
 bool ServerMap::movePlayer(float delta_x, float delta_y){
     float new_x = player.x + delta_x;
     float new_y = player.y + delta_y; 
-    if(new_x < 0 || new_x > cell_cols || new_y < 0 || new_y > cell_rows){
+    if(new_x < Player::ps_x || (cell_cols - Player::ps_x) < new_x || new_y < Player::ps_y || (cell_rows - Player::ps_y) < new_y){
         return false;
     }
     player.x = new_x;

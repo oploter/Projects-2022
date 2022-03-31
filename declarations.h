@@ -9,6 +9,9 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+#define PI 3.14159265358979323846
+
+
 inline sf::Font* get_or_create_font(const std::string& font_name, const std::string& path_to_font = ""){
     static std::unordered_map<std::string, std::unique_ptr<sf::Font>> fonts;
     if(fonts.count(font_name) == 0){
@@ -43,8 +46,8 @@ enum BlockType {green = 0, brick, water, noblock, used};
 
 struct Player{
 public:
-    float x = 0;
-    float y = 0;
+    float x = 0, y = 0;
+    static float ps_x, ps_y;
     friend struct Map;
     Player();
     std::pair<int, int> get_map_cords() const;
@@ -53,7 +56,7 @@ public:
     enum PlayerState{still, run};
 
 private: 
-    float speed = 2;
+    float speed = 1;
     int img_id = 0;
     std::pair<int, int> dir;
     friend struct ClientGame;
@@ -76,16 +79,25 @@ struct Map{
 public:
     static const int BlockSize;
     static const int CellSize;
+    static const float HalfBlockSize;
 
-    Map() : player(){}
-    Map(const std::string& file_name);    
+    Map() : player(), plant_r(50.0 / CellSize){}
+    Map(const std::string& file_name); 
+    void updateBullets(sf::RenderTarget* window = nullptr);
+    void updatePlants(sf::RenderTarget* window = nullptr);
+    float map_to_pl(int cord);
     Player player;
 
 protected:
     friend struct ClientGame;
+    friend struct ServerGame;
     std::vector<std::vector<Block>> field;
+    std::vector<std::vector<float>> bullets;
+    std::vector<std::pair<float, float>> plants;
+    std::vector<int> plants_cnts;
     int block_rows, block_cols;
     int cell_rows, cell_cols;
+    float plant_r;
 };
 // end Map
 

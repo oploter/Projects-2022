@@ -14,9 +14,6 @@ private:
     ClientMap map;
     int windowWidth;
     int windowHeight;
-    int cellsWidth;
-    int cellsHeight;
-
 
     sf::TcpSocket server;
     sf::IpAddress ip;

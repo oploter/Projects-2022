@@ -21,6 +21,7 @@ public:
     void updateField(int row, int col, bool display = false);
     void print(sf::RenderTarget& target);
     void loadMap(const std::string& file_name);
+    void printHp();
 
 };
 
