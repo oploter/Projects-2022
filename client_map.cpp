@@ -6,7 +6,6 @@
 #include <cassert>
 #include "client_map.h"
 #include "declarations.h"
-
 //Map
 
 const std::unordered_map<BlockType, std::string> ClientMap::textureNames = {{green, "green_block"}, {brick, "brick_block"}, {water, "water_block"}, {noblock, "noblock_block"}, {used, "yellow_block"}};

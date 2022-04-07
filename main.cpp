@@ -5,8 +5,7 @@
 
 int main(){
 
-    ClientGame clg;
-    std::cout << "client running\n";    
+    ClientGame clg; 
     clg.runGame();
 
 }

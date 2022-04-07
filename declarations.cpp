@@ -41,9 +41,6 @@ void Map::updateBullets(sf::RenderTarget* window){
         }
         float delta_x = (b[0] - player.x);
         float delta_y = (b[1] - player.y);
-        if(delta_x * delta_x - delta_y * delta_y < 4){
-            player.hp--;
-        }
         if(window != nullptr){
             shp.setPosition(b[0] * CellSize, b[1] * CellSize);
             shp.setRotation(b[4]);
@@ -78,7 +75,13 @@ void Map::updatePlants(sf::RenderTarget* window){
             rsh1.setFillColor(sf::Color(100, 255, 0));
             rsh1.setOrigin({6, 6});
             rsh1.setPosition({p.first * BlockSize + HalfBlockSize, p.second * BlockSize + HalfBlockSize});
+            sf::CircleShape csh(CellSize * plant_r);
+            csh.setFillColor(sf::Color::Transparent);
+            csh.setOutlineThickness(3);
+            csh.setOutlineColor(sf::Color::Red);
+            csh.setPosition({p.first * BlockSize + HalfBlockSize - plant_r * CellSize, p.second * BlockSize + HalfBlockSize - plant_r * CellSize});
             window->draw(rsh1);
+            window->draw(csh);
         }
     }
 }
@@ -100,19 +103,18 @@ void Player::print(sf::RenderTarget& window){
     if(state == still){
         s.setTexture(*get_or_create_texture("player_0"));
     }else if(state == run){
-        s.setTexture(*get_or_create_texture("player_" + std::to_string(img_id)));
+        s.setTexture(*get_or_create_texture("player_" + std::to_string(img_id / 2)));
         img_id++;
-        if(img_id > 8){
+        if(img_id > 17){
             img_id = 0;
-        }   
+        }
     }
     s.setScale(0.5, 0.5);
     window.draw(s);
-    sf::RectangleShape rsh({15, 15});
-    rsh.setFillColor(sf::Color::Blue);
-    rsh.setOrigin({7.5, 7.5});
-    rsh.setPosition(x * Map::CellSize, y * Map::CellSize);
-    //window.draw(rsh);
+    sf::RectangleShape rshp({10, 10});
+    rshp.setFillColor(sf::Color::Green);
+    rshp.setPosition({x * Map::CellSize, y * Map::CellSize});
+    window.draw(rshp);
 }
 
 void Player::updatePos(float delta_x, float delta_y){
