@@ -161,7 +161,7 @@ void ClientGame::loadTextures(){
 
     sf::Image player_image;
     player_image.loadFromFile("fonts_textures/player.png");
-    player_image.createMaskFromColor(player_image.getPixel(2, 2));
+    //player_image.createMaskFromColor(player_image.getPixel(2, 2));
     for(int i = 0; i < 8; i++){
         int l_x = i * 102.5 + 20;
         int r_x = l_x + 82.5;

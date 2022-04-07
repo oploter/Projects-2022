@@ -34,35 +34,23 @@ std::pair<int, int> Player::get_map_cords() const {
     return {(Map::CellSize * x) / Map::BlockSize, (Map::CellSize * y) / Map::BlockSize};
 }
 
-void Player::print(sf::RenderTarget& target){
-    static int prev = 0;
+void Player::print(sf::RenderTarget& window){
     sf::Sprite s;
     if(state == still){
         s.setTexture(*get_or_create_texture("player_0"));
-        if(prev != 0){
-            prev = 0;
-        }
     }else if(state == run){
-        s.setTexture(*get_or_create_texture("player_" + std::to_string((img_id) / 3)));
-        if(img_id / 3 > prev){
-            prev = img_id / 3;
-        }
+        s.setTexture(*get_or_create_texture("player_" + std::to_string(img_id / 2)));
         img_id++;
-        if(img_id > 8 * 3 -1){
+        if(img_id > 15){
             img_id = 0;
         }
     }
     s.setScale(0.5, 0.5);
-    float s_width = s.getLocalBounds().width * 0.5;
-    float s_height = s.getLocalBounds().height * 0.5;
-    s.setOrigin(s_width / 2, s_height / 2);
-    s.setPosition(Map::CellSize * x, Map::CellSize * y);
-
-    if(s.getScale().x * dir.first < 0){
-        s.scale(-1, 1);
-    }
-    target.draw(s);
+    s.setOrigin(s.getGlobalBounds().width/2, s.getGlobalBounds().height/2);
+    s.setPosition({x * Map::CellSize, y * Map::CellSize});
+    window.draw(s);
 }
+
 
 void Player::updatePos(float delta_x, float delta_y){
     x += delta_x;
