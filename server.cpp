@@ -32,10 +32,11 @@ void ServerGame::SendMessages(){
         m.lock(); 
         while (!Q.empty()) { 
             packet = Q.pop(); 
-            packet >> x >> y; 
-            if (map.movePlayer(x, y)) {
+            int player_id;
+            packet >> player_id >> x >> y; 
+            if (map.movePlayer(player_id, x, y)) {
                 packet.clear();
-                packet << x << y; 
+                packet << player_id << x << y; 
                 socket.send(packet); 
             } 
         } 

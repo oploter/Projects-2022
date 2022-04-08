@@ -10,23 +10,35 @@
 #include "cl_sr_queue.h"
 
 
-int ClientGame::gameWindow(){
-    std::cout << "map loaded\n";
-    map.loadMap("map.txt");
-    // connect
-    std::thread srv_thread([](){
-    ServerGame srv;
-    srv.runGameServer();
-    });
+int ClientGame::gameWindow(bool single_game){
+    if(single_game){
+        map.loadMap("map.txt");
+        // connect
+        std::thread srv_thread([](){
+        ServerGame srv;
+        srv.runGameServer();
+        });
+        srv_thread.detach();
+    }
     if(server.connect(ip, 12345) != sf::Socket::Done){
-        std::cout << "cant connetct\n";
         return 1;
     }
     std::cout << "connected\n";
-
     std::thread receive_thread([this](){
         ReceiveMessages();
     });
+
+    if(single_game){
+        player_id = 0;
+    }else{
+        msg << 2;
+        if(server.send(msg) != sf::Socket::Done){
+            return 1;
+        }
+        sf::Packet new_msg = std::move(Q.pop());
+        new_msg >> player_id;
+    }
+    Player& curr_player = map.players[player_id];
     // end connect
 
     bool was_moved_prev = false;
@@ -38,16 +50,16 @@ int ClientGame::gameWindow(){
                 auto& code = ev.key.code;
                 if(move_deltas.count(code) > 0){
                     std::pair<float, float> delta = move_deltas.at(code);
-                    delta.first *= map.player.speed;
-                    delta.second *= map.player.speed;
+                    delta.first *= curr_player.speed;
+                    delta.second *= curr_player.speed;
                     if(ev.key.shift){
                         delta.first *= 1.5;
                         delta.second *= 1.5;
                     }
-                    sf::Packet new_msg;
-                    new_msg << delta.first << delta.second;
+                    msg.clear();
+                    msg << player_id << delta.first << delta.second;
 
-                    if(server.send(new_msg) != sf::Socket::Done){
+                    if(server.send(msg) != sf::Socket::Done){
                         return 1;
                     }
                 }
@@ -61,24 +73,25 @@ int ClientGame::gameWindow(){
             new_msgs = true;
             sf::Packet new_msg = std::move(Q.pop());
             float delta_x, delta_y;
-            new_msg >> delta_x >> delta_y;
-            map.player.updatePos(delta_x, delta_y);
-            was_moved_curr = true;
+            int player_id_;
+            new_msg >> player_id_ >> delta_x >> delta_y;
+            map.players[player_id_].updatePos(delta_x, delta_y);
+            if(player_id_ == player_id){
+                was_moved_curr = true;
+            }
         }
         if(was_moved_curr || (!new_msgs && was_moved_prev)){
-            map.player.state = Player::PlayerState::run;
+            curr_player.state = Player::PlayerState::run;
         }else if(new_msgs || (!new_msgs && !was_moved_prev)){
-            map.player.state = Player::PlayerState::still;
+            curr_player.state = Player::PlayerState::still;
         }
         was_moved_prev = was_moved_curr;
 
         window.clear();
         map.print(window);
-        map.player.print(window);
         window.display();
     }
     receive_thread.join();
-    srv_thread.join();
     return 0;
 }
 
@@ -149,7 +162,24 @@ void ClientGame::ReceiveMessages(){
 
 ClientGame::ClientGame() : ip("127.0.0.1"){}
 
-
+int find_first(sf::Image& img, int x_str, bool non_white, const sf::Color& color){
+    int y_n = img.getSize().y;
+    while(x_str < img.getSize().x){
+        bool chc = !non_white;
+        for(int y = 0; y < y_n; y++){
+            if(non_white){
+                chc |= (img.getPixel(x_str, y) != color);
+            }else{
+                chc &= (img.getPixel(x_str, y) == color);
+            }
+        }
+        if(chc){
+            return x_str;
+        }
+        x_str++;
+    }
+    return -1;
+}
 void ClientGame::loadTextures(){
     get_or_create_texture("green_block", "fonts_textures/green_block.png");
     get_or_create_texture("brick_block", "fonts_textures/brick_block.png");
@@ -160,12 +190,16 @@ void ClientGame::loadTextures(){
     get_or_create_font("basic_font", "fonts_textures/basicFont.otf");
 
     sf::Image player_image;
-    player_image.loadFromFile("fonts_textures/player.png");
+    player_image.loadFromFile("fonts_textures/player_.png");
     //player_image.createMaskFromColor(player_image.getPixel(2, 2));
+    int prev = 0;
+    int y_h = player_image.getSize().y;
+    sf::Color trnsprnt_color = player_image.getPixel(2, 2);
     for(int i = 0; i < 8; i++){
-        int l_x = i * 102.5 + 20;
-        int r_x = l_x + 82.5;
-        sf::Texture* img_texture = get_or_create_texture("player_" + std::to_string(i));
-        img_texture->loadFromImage(player_image, {l_x, 2, r_x - l_x, 142});
+        int str_i = find_first(player_image, prev, true, trnsprnt_color);
+        int end_i = find_first(player_image, str_i + 1, false, trnsprnt_color);
+        prev = end_i + 1;
+        sf::Texture* texture = get_or_create_texture("player_" + std::to_string(i));
+        texture->loadFromImage(player_image, {str_i, 0, end_i - str_i, y_h});
     }
 }

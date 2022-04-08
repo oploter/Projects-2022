@@ -9,7 +9,7 @@ public:
     ServerMap();
     ServerMap(const std::string& file_name);
 
-    bool movePlayer(float delta_x, float delta_y);
+    bool movePlayer(int player_id, float delta_x, float delta_y);
 };
 
 #endif

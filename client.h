@@ -15,7 +15,9 @@ private:
     int windowWidth;
     int windowHeight;
     int cellsWidth;
+    int player_id;
     int cellsHeight;
+    sf::Packet msg;
 
 
     sf::TcpSocket server;
@@ -31,7 +33,7 @@ public:
 
     void mainWindow();
 
-    int gameWindow();
+    int gameWindow(bool single_game = true);
 
     void ReceiveMessages();
 

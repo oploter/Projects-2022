@@ -30,8 +30,11 @@ void ClientMap::updateField(int row, int col, bool display){
 void ClientMap::print(sf::RenderTarget& window){
     sf::Sprite s(rTexture.getTexture());
     window.draw(s);
-    stateText.setPosition(window.getSize().x - stateText.getLocalBounds().width, Map::BlockSize);
-    window.draw(stateText);
+    //stateText.setPosition(window.getSize().x - stateText.getLocalBounds().width, Map::BlockSize);
+    //window.draw(stateText);
+    for(Player& plr : players){
+        plr.print(window);
+    }
 }
 
 void ClientMap::loadMap(const std::string& file_name){
@@ -58,4 +61,5 @@ void ClientMap::loadMap(const std::string& file_name){
     stateText.setFillColor(sf::Color::Red);
     stateText.setScale(0.9, 0.9);
     rTexture.display();
+    create_player();
 }

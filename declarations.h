@@ -58,6 +58,7 @@ private:
     std::pair<int, int> dir;
     friend struct ClientGame;
     PlayerState state;
+    sf::Color player_color;
 };
 
 
@@ -77,15 +78,16 @@ public:
     static const int BlockSize;
     static const int CellSize;
 
-    Map() : player(){}
+    Map(){}
     Map(const std::string& file_name);    
-    Player player;
+    int create_player();
 
 protected:
     friend struct ClientGame;
     std::vector<std::vector<Block>> field;
     int block_rows, block_cols;
     int cell_rows, cell_cols;
+    std::vector<Player> players;
 };
 // end Map
 
