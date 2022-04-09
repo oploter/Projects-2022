@@ -9,10 +9,10 @@
 #include <chrono> 
 #include <mutex> 
 std::mutex m; 
-void ServerGame::runGameServer(){ 
+void ServerGame::runGameServer(int port){ 
     map = ServerMap("map.txt");  
     sf::IpAddress ip = sf::IpAddress::getLocalAddress(); 
-    listener.listen(12345); 
+    listener.listen(port); 
     if (listener.accept(socket) != sf::Socket::Done) { 
         std::cout << "Error!\n"; 
         return; 

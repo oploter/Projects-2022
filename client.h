@@ -18,6 +18,7 @@ private:
     int player_id;
     int cellsHeight;
     sf::Packet msg;
+    int port;
 
 
     sf::TcpSocket server;

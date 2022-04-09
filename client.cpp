@@ -1,8 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <thread>
+#include <sstream>
 #include "client.h"
 #include "server.h"
 #include "declarations.h"
@@ -11,22 +13,47 @@
 
 
 int ClientGame::gameWindow(bool single_game){
+    if(!single_game){
+        std::ifstream port_file("ports.txt", std::ios_base::out | std::ios_base::app);
+        std::cout << "==Ports==\n";
+        std::string line;
+        std::getline(port_file, line);
+        std::stringstream ss(line);
+        std::vector<int> available_ports;
+        int new_port;
+        while(ss >> new_port){
+            available_ports.push_back(new_port);
+            std::cout << new_port << std::endl;
+            ss.ignore(1);
+        }
+        std::cout << "\n====\nChoose one: ";
+        std::cin >> port;
+        while(std::count(available_ports.begin(), available_ports.end(), port) <= 0){
+            std::cout << "Choose one: ";
+            std::cin >> port;
+        }
+    }
     if(single_game){
         map.loadMap("map.txt");
         // connect
-        std::thread srv_thread([](){
+        port = 12345 + std::rand() % 12345;
+        std::ofstream port_file("ports.txt", std::ios_base::out | std::ios_base::app);
+        port_file << port << ";";
+        std::thread srv_thread([this](){
         ServerGame srv;
-        srv.runGameServer();
+        srv.runGameServer(port);
         });
         srv_thread.detach();
     }
-    if(server.connect(ip, 12345) != sf::Socket::Done){
+    std::cout << "port is " << port << std::endl;
+    if(server.connect(ip, port) != sf::Socket::Done){
         return 1;
     }
     std::cout << "connected\n";
     std::thread receive_thread([this](){
         ReceiveMessages();
     });
+    receive_thread.detach();
 
     if(single_game){
         player_id = 0;
@@ -91,7 +118,27 @@ int ClientGame::gameWindow(bool single_game){
         map.print(window);
         window.display();
     }
-    receive_thread.join();
+
+    std::cout << "closed window\n";
+    std::cout << "hello\n";
+    std::string upd_available_ports;
+    std::ifstream ports_in("ports.txt", std::ios_base::in);
+    std::string av_ports;
+    std::getline(ports_in, av_ports);
+    ports_in.close();
+    std::stringstream iss(av_ports);
+    std::stringstream oss;
+    int n_port;
+    while(iss >> n_port){
+        if(n_port != port){
+            oss << n_port << ';';
+        }
+        iss.ignore(1);
+    }  
+    std::ofstream ports_out("ports.txt", std::ios_base::out);
+    std::string res = oss.str();
+    ports_out << res;
+    std::cout << "return from\n";
     return 0;
 }
 
@@ -99,7 +146,7 @@ int ClientGame::gameWindow(bool single_game){
 void ClientGame::mainWindow(){
     sf::Font* basic_font = get_or_create_font("basic_font");
 
-    sf::Text start_button("Start game", *basic_font);
+    sf::Text start_button("Start single game", *basic_font);
     start_button.setOutlineColor(sf::Color::Green);
     start_button.setOutlineThickness(1);
     start_button.setPosition(sf::Vector2f(windowWidth/2 - (start_button.getLocalBounds().width)/2, windowHeight/2 - (start_button.getLocalBounds().height)/2));
@@ -110,6 +157,13 @@ void ClientGame::mainWindow(){
     sf::FloatRect start_button_pos = start_button.getGlobalBounds();
     close_button.setPosition(start_button_pos.left, start_button_pos.top + start_button_pos.height + 10);
 
+    sf::Text join_button("Join game", *basic_font);
+    join_button.setOutlineColor(sf::Color::Green);
+    join_button.setOutlineThickness(1);
+    sf::FloatRect close_button_pos = close_button.getGlobalBounds();
+    join_button.setPosition(close_button_pos.left, close_button_pos.top + close_button_pos.height + 10);
+
+
     while(window.isOpen()){
         sf::Event event;
         while(window.pollEvent(event)){
@@ -119,10 +173,11 @@ void ClientGame::mainWindow(){
                 int mouse_x = event.mouseButton.x;
                 int mouse_y = event.mouseButton.y;
                 if(start_button.getGlobalBounds().contains(mouse_x, mouse_y)){
-                    gameWindow();
-
+                    gameWindow(true);
                 }else if(close_button.getGlobalBounds().contains(mouse_x, mouse_y)){
                     window.close();
+                }else if(join_button.getGlobalBounds().contains(mouse_x, mouse_y)){
+                    gameWindow(false);
                 }
             } 
         }
@@ -131,6 +186,7 @@ void ClientGame::mainWindow(){
 
         window.draw(start_button);
         window.draw(close_button);
+        window.draw(join_button);
 
         window.display();
 
@@ -146,8 +202,8 @@ void ClientGame::runGame(){
     cellsHeight = 1 + windowHeight / Map::CellSize;
     window.setFramerateLimit(30);
     loadTextures();
-    //mainWindow();
-    gameWindow();
+    mainWindow();
+    //gameWindow();
 }
 
 void ClientGame::ReceiveMessages(){

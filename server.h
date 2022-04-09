@@ -14,7 +14,7 @@ private:
     float x, y; 
      
 public: 
-    void runGameServer(); 
+    void runGameServer(int port); 
     void SendMessages(); 
     void ReceiveMessages(); 
     //void checkAndPlant(); 
