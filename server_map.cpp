@@ -7,14 +7,14 @@ ServerMap::ServerMap(const std::string& file_name) : Map(file_name){}
 
 ServerMap::ServerMap() : Map() {}
 
-bool ServerMap::movePlayer(int player_id, float delta_x, float delta_y){
+bool ServerMap::movePlayer(int player_id, float delta_x, float delta_y, int direction_id){
     Player& player = players[player_id];
-    float new_x = player.x + delta_x;
-    float new_y = player.y + delta_y; 
+    auto [new_x, new_y] = player.get_cords();
+    new_x += delta_x;
+    new_y += delta_y;
     if(new_x < 0 || new_x > cell_cols || new_y < 0 || new_y > cell_rows){
         return false;
-    }
-    player.x = new_x;
-    player.y = new_y;
+    };
+    player.updatePos(delta_x, delta_y, direction_id);
     return true;
 }

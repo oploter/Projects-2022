@@ -1,14 +1,12 @@
 #ifndef LOAD_FONTS_H
 #define LOAD_FONTS_H
-
-
 #include <unordered_map>
 #include <string>
 #include <memory>
 #include <vector>
 #include <iostream>
 #include <SFML/Graphics.hpp>
-
+#define PI 3.14159265358979323846
 inline sf::Font* get_or_create_font(const std::string& font_name, const std::string& path_to_font = ""){
     static std::unordered_map<std::string, std::unique_ptr<sf::Font>> fonts;
     if(fonts.count(font_name) == 0){
@@ -29,69 +27,67 @@ inline sf::Texture* get_or_create_texture(const std::string& texture_name, const
         }
     }
     return textures[texture_name].get();
-
 }
-
-const std::unordered_map<sf::Keyboard::Key, std::pair<int, int>> move_deltas = {{sf::Keyboard::W, {0, -1}}, {sf::Keyboard::A, {-1, 0}}, {sf::Keyboard::S, {0, 1}}, {sf::Keyboard::D, {1, 0}}};
-
-
-
-// MAP begin
 struct Block;
- 
 enum BlockType {green = 0, brick, water, noblock, used};
-
 struct Player{
 public:
-    float x = 0;
-    float y = 0;
-    friend struct Map;
     Player();
     std::pair<int, int> get_map_cords() const;
-    void print(sf::RenderTarget& window);
-    void updatePos(float delta_x, float delta_y);
+    std::pair<float, float> get_cords() const;
+    float getSpeed() const;
+    void updatePos(float delta_x, float delta_y, int direction_id_);
     enum PlayerState{still, run};
-
+    void print(sf::RenderTarget& window);
+    void setState(PlayerState new_state);
 private: 
-    float speed = 2;
-    int img_id = 0;
-    std::pair<int, int> dir;
+    float x, y;
+    float speed = 1;
+    std::vector<int> img_id = {0, 0, 0, 0};
     friend struct ClientGame;
+    int direction = 0;
     PlayerState state;
     sf::Color player_color;
 };
-
-
-
 struct Block{
 public:
-    BlockType type;
-
+     BlockType type;
 public:
     Block() = default;
     Block(BlockType type_) : type(type_){}
 };
-
-// Map
-
+struct Bullet{
+    float curr_x, curr_y;
+    float dx, dy;
+    float angle;
+};
 struct Map{
 public:
     static const int BlockSize;
     static const int CellSize;
-
     Map(){}
     Map(const std::string& file_name);    
     int create_player();
+    Player& getPlayer(int player_id);
+    void addBullet() noexcept;
 
 protected:
     friend struct ClientGame;
+    friend struct ServerGame;
     std::vector<std::vector<Block>> field;
     int block_rows, block_cols;
     int cell_rows, cell_cols;
     std::vector<Player> players;
+    std::vector<Bullet> bullets;
 };
-// end Map
-
+struct Direction{
+    std::pair<int, int> delta;
+    int id;
+    std::string name;
+    int max_img_num;
+};
+extern const std::vector<Direction> directions;
+extern const std::unordered_map<sf::Keyboard::Key, int> direction_ids;
 
 
 #endif
