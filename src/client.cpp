@@ -6,15 +6,15 @@
 #include <thread>
 #include <sstream>
 #include <cassert>
-#include "client.h"
-#include "server.h"
-#include "declarations.h"
-#include "client_map.h"
-#include "cl_sr_queue.h"
-#include "client_functions.h"
+#include "../include/client.h"
+#include "../include/server.h"
+#include "../include/declarations.h"
+#include "../include/client_map.h"
+#include "../include/cl_sr_queue.h"
+#include "../include/client_functions.h"
 
 namespace{
-int find_first(sf::Image& img, int x_str, bool non_white, const sf::Color& color){
+int find_first(sf::Image& img, std::size_t x_str, bool non_white, const sf::Color& color){
     int y_n = img.getSize().y;
     while(x_str < img.getSize().x){
         bool chc = !non_white;
@@ -71,7 +71,6 @@ void ClientGame::readMessages(){
     while(server.getMessage(type, msg)){
         new_msgs = true;
         if(type == 1){
-            std::cout << "SERVER SAYS PLAYER HAS MOVED\n";
             float delta_x, delta_y;
             int player_id_, direction_id;
             msg >> player_id_ >> delta_x >> delta_y >> direction_id;
@@ -83,10 +82,9 @@ void ClientGame::readMessages(){
     }
 }
 int ClientGame::gameWindow(bool single_game){
-    std::cout << "before init\n";
     int port = server.init(single_game);
     if(single_game){
-        map.loadMap("map.txt");
+        map.loadMap("../map.txt");
         std::thread server_thread([&port](){
         ServerGame server_game;
         server_game.runGameServer(port);
@@ -125,7 +123,6 @@ int ClientGame::gameWindow(bool single_game){
 }
 void ClientGame::mainWindow(){
     std::cout << "in main\n";
-    sf::Font* basic_font = get_or_create_font("basic_font");
     sf::Text start_button = createButton("Start single game", sf::Color::Green, {windowWidth/2 - 100, windowHeight/2 - 10});
     sf::FloatRect start_button_pos = start_button.getGlobalBounds();
     sf::Text close_button = createButton("Exit", sf::Color::Red, {start_button_pos.left, start_button_pos.top + start_button_pos.height + 10});
@@ -171,30 +168,30 @@ void ClientGame::runGame(){
     mainWindow();
 }
 void ClientGame::loadTextures(){
-    get_or_create_texture("green_block", "fonts_textures/green_block.png");
-    get_or_create_texture("brick_block", "fonts_textures/brick_block.png");
-    get_or_create_texture("noblock_block", "fonts_textures/noblock_block.png");
-    get_or_create_texture("yellow_block", "fonts_textures/yellow_block.png");
-    get_or_create_texture("water_block", "fonts_textures/water_block.png");
-    get_or_create_texture("return_button", "fonts_textures/returnButton.png");
-    get_or_create_font("basic_font", "fonts_textures/basicFont.otf");
+    get_or_create_texture("green_block", "../fonts_textures/green_block.png");
+    get_or_create_texture("brick_block", "../fonts_textures/brick_block.png");
+    get_or_create_texture("noblock_block", "../fonts_textures/noblock_block.png");
+    get_or_create_texture("yellow_block", "../fonts_textures/yellow_block.png");
+    get_or_create_texture("water_block", "../fonts_textures/water_block.png");
+    get_or_create_texture("return_button", "../fonts_textures/returnButton.png");
+    get_or_create_font("basic_font", "../fonts_textures/basicFont.otf");
     for(auto[img_name, num_imgs] : std::vector<std::pair<std::string, int>>{{"up", 3}, {"down", 4}, {"left", 4}, {"right", 4}}){
         sf::Image new_img;
-        new_img.loadFromFile("fonts_textures/player_" + img_name + ".png");
+        new_img.loadFromFile("../fonts_textures/player_" + img_name + ".png");
         sf::Color transparent_color = new_img.getPixel(1, 1);
         new_img.createMaskFromColor(transparent_color);
         transparent_color.a = 0;
         cut_image(new_img, img_name, num_imgs, transparent_color);
     }
+    std::cout << "loading doen\n";
 }
 sf::Text ClientGame::createButton(std::string label, const sf::Color& outline_color, std::pair<float, float> left_up_cords, int thickness, sf::Font* font){
-    std::cout << "in creating " << label << ' ' << left_up_cords.first << ' ' << left_up_cords.second << "\n";
     sf::Text new_button(std::move(label), *font);
     new_button.setOutlineColor(outline_color);
     new_button.setOutlineThickness(thickness);
     new_button.setPosition(left_up_cords.first, left_up_cords.second);
     std::cout << "button created\n";
-    return std::move(new_button);
+    return new_button;
 }
 
 }

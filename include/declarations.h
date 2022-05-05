@@ -56,11 +56,6 @@ public:
     Block() = default;
     Block(BlockType type_) : type(type_){}
 };
-struct Bullet{
-    float curr_x, curr_y;
-    float dx, dy;
-    float angle;
-};
 struct Map{
 public:
     static const int BlockSize;
@@ -69,7 +64,6 @@ public:
     Map(const std::string& file_name);    
     int create_player();
     Player& getPlayer(int player_id);
-    void addBullet() noexcept;
 
 protected:
     friend struct ClientGame;
@@ -78,7 +72,6 @@ protected:
     int block_rows, block_cols;
     int cell_rows, cell_cols;
     std::vector<Player> players;
-    std::vector<Bullet> bullets;
 };
 struct Direction{
     std::pair<int, int> delta;

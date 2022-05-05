@@ -4,8 +4,8 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include "client_map.h"
-#include "declarations.h"
+#include "../include/client_map.h"
+#include "../include/declarations.h"
 //Map
 const std::unordered_map<BlockType, std::string> ClientMap::textureNames = {{green, "green_block"}, {brick, "brick_block"}, {water, "water_block"}, {noblock, "noblock_block"}, {used, "yellow_block"}};
 ClientMap::ClientMap(const std::string& file_name) : Map(){
@@ -40,8 +40,8 @@ void ClientMap::loadMap(const std::string& file_name){
     if(!rTexture.create(block_cols * BlockSize, block_rows * BlockSize)){
         return;
     }
-    for(std::size_t row = 0; row < block_rows; row++){
-        for(std::size_t col = 0; col < block_cols; col++){
+    for(int row = 0; row < block_rows; row++){
+        for(int col = 0; col < block_cols; col++){
             int el;
             file >> el;
             field[row][col] = static_cast<BlockType>(el);

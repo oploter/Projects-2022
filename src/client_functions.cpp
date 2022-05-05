@@ -1,18 +1,23 @@
-#include "client_functions.h"
-#include "declarations.h"
-#include "server.h"
+#include "../include/client_functions.h"
+#include "../include/declarations.h"
+#include "../include/server.h"
 #include <SFML/Network.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
+#include <exception>
 #include <thread>
 namespace client{
 int Client_Server_Conn::init(bool single_player){
     std::cout << "init " << single_player << " iitn\n";
     if(!single_player){
-        std::ifstream port_file("ports.txt", std::ios_base::out | std::ios_base::app);
+        std::ifstream port_file("../ports.txt", std::ios_base::out | std::ios_base::app);
+        if(!port_file.is_open()){
+            std::cout << "CANT OPEN FILE\n";
+            std::terminate();
+        }
         std::cout << "==Ports==\n";
         std::string line;
         std::getline(port_file, line);
@@ -35,6 +40,7 @@ int Client_Server_Conn::init(bool single_player){
         std::ofstream port_file("ports.txt", std::ios_base::out | std::ios_base::app);
         port_file << port << ";";
     }
+    std::cout << "PORT IS " << port << "\n";
     return port;
 }
 void Client_Server_Conn::receiveMessages(){
@@ -90,7 +96,7 @@ int Client_Server_Conn::run(bool single_player){
 sf::Packet Client_Server_Conn::getPacket(int msg_type){
     sf::Packet new_msg;
     new_msg << msg_type << player_id;
-    return std::move(new_msg);
+    return new_msg;
 }
 bool Client_Server_Conn::send(sf::Packet&& packet){
     if(server_socket.send(packet) != sf::Socket::Done){

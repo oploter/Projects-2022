@@ -1,17 +1,17 @@
 #include <SFML/Network.hpp> 
-#include "server.h" 
-#include "cl_sr_queue.h" 
+#include "../include/server.h" 
+#include "../include/cl_sr_queue.h"
+#include "../include/server_map.h" 
 #include <chrono> 
 #include <thread> 
 #include <iostream> 
-#include <utility> 
-#include "server_map.h" 
+#include <utility>  
 #include <chrono> 
 #include <mutex> 
 std::mutex m; 
 void ServerGame::runGameServer(int port){ 
     std::cout << "hello from server game " << port << "\n";
-    map = ServerMap("map.txt");  
+    map = ServerMap("../map.txt");  
     //sf::IpAddress ip = sf::IpAddress::getLocalAddress(); 
     sf::IpAddress ip{"127.0.0.1"};
     listener.listen(port); 

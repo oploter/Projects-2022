@@ -1,5 +1,5 @@
-#include "client.h"
-#include "server.h"
+#include "../include/client.h"
+#include "../include/server.h"
 #include <thread>
 
 
